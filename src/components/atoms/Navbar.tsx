@@ -26,21 +26,22 @@ const Navbar = () => {
         >
           <Menu className="h-5 w-5" />
         </button>
-        <div className="flex items-center gap-2 cursor-pointer">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => {
+            router.push("/");
+            setMobileMenuOpen(false);
+          }}
+        >
           <Code className="h-5 w-5 text-emerald-500" />
-          <span
-            onClick={() => {
-              router.push("/");
-            }}
-            className="text-lg font-semibold tracking-tight"
-          >
+          <span className="text-lg font-semibold tracking-tight">
             CodeSync
           </span>
         </div>
       </div>
 
       {/* Desktop Right Side */}
-      {!isLoggedIn ? (
+      {isLoggedIn ? (
         <div className="hidden md:flex items-center gap-2">
           {/* Branch Button */}
           <div className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-zinc-300 hover:bg-emerald-800/60 hover:text-zinc-100">
@@ -128,7 +129,13 @@ const Navbar = () => {
           {/* Drawer */}
           <div className="relative ml-auto w-64 max-w-full bg-zinc-900 shadow-lg h-full flex flex-col p-4 gap-4">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+              <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => {
+                  router.push("/");
+                  setMobileMenuOpen(false);
+                }}
+              >
                 <Code className="h-5 w-5 text-emerald-500" />
                 <span className="text-lg font-semibold tracking-tight">
                   CodeSync
@@ -143,42 +150,73 @@ const Navbar = () => {
               </button>
             </div>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-zinc-300 hover:bg-emerald-800/60 hover:text-zinc-100">
-                <GitBranch className="h-4 w-4" />
-                <span>main</span>
-              </div>
-              <button className="flex items-center gap-2 p-1 text-zinc-300 hover:text-zinc-100 focus:outline-none">
-                <Save className="h-5 w-5" />
-                <span>Save</span>
-              </button>
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-zinc-500 px-2">Settings</span>
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                >
-                  Editor Settings
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                >
-                  User Preferences
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                >
-                  Keyboard Shortcuts
-                </button>
-              </div>
-              <button className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 focus:outline-none mt-2">
-                <Share2 className="h-4 w-4" />
-                <span>Share</span>
-              </button>
+              {isLoggedIn ? (
+                <>
+                  {/* Branch Button */}
+                  <div className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-zinc-300 hover:bg-emerald-800/60 hover:text-zinc-100">
+                    <GitBranch className="h-4 w-4" />
+                    <span>main</span>
+                  </div>
+                  {/* Save Button */}
+                  <button className="flex items-center gap-2 p-1 text-zinc-300 hover:text-zinc-100 focus:outline-none">
+                    <Save className="h-5 w-5" />
+                    <span>Save</span>
+                  </button>
+                  {/* Settings Dropdown (as list) */}
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-zinc-500 px-2">Settings</span>
+                    <button
+                      type="button"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                    >
+                      Editor Settings
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                    >
+                      User Preferences
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                    >
+                      Keyboard Shortcuts
+                    </button>
+                  </div>
+                  {/* Share Button */}
+                  <button className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 focus:outline-none mt-2">
+                    <Share2 className="h-4 w-4" />
+                    <span>Share</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push("/signin");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm text-emerald-400 hover:text-emerald-500 font-semibold"
+                  >
+                    Signin
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push("/signup");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 focus:outline-none transition-colors"
+                  >
+                    SignUp
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
