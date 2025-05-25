@@ -9,7 +9,7 @@ const RoomsList = ({ rooms }: RoomsListProps) => {
   if (rooms.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
-        <p className="text-gray-500">You haven't created any rooms yet.</p>
+        <p className="text-gray-500">You haven&apos;t created any rooms yet.</p>
       </div>
     );
   }

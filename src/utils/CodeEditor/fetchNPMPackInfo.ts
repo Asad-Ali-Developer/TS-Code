@@ -19,6 +19,7 @@ const fetchNpmPackageInfo = async (
       homepage: data.homepage,
     };
   } catch (error) {
+    console.log("Error fetching package info:", error);
     return null;
   }
 };

@@ -1,14 +1,15 @@
 import { FileNode } from "@/types";
 import { Dispatch, SetStateAction } from "react";
+import createNextJsProject from "./createNextJsProject";
 import fetchNpmPackageInfo from "./fetchNPMPackInfo";
 import findPackageJson from "./findPackagJson";
-import createNextJsProject from "./createNextJsProject";
+import type { Terminal as XTermTerminal } from "xterm";
 
 type ItemType = "file" | "folder";
 
 const handleCommand = async (
   command: string,
-  terminal: any,
+  terminal: XTermTerminal,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
   fileSystem: FileNode[],
   setFileSystem: Dispatch<SetStateAction<FileNode[]>>,
@@ -311,6 +312,7 @@ const handleCommand = async (
               terminal.writeln("");
               terminal.writeln("🔍 found 0 vulnerabilities");
             } catch (error) {
+              console.error("Error parsing package.json:", error);
               terminal.writeln("\x1b[31m✗\x1b[0m Error parsing package.json");
               terminal.writeln("Make sure package.json contains valid JSON");
             }
@@ -401,6 +403,7 @@ const handleCommand = async (
                 });
               }
             } catch (error) {
+              console.error("Error reading package.json:", error);
               terminal.writeln("\x1b[31m✗\x1b[0m Error reading package.json");
             }
           } else {
@@ -422,22 +425,36 @@ const handleCommand = async (
               terminal.writeln(
                 `\x1b[33mFound ${data.objects.length} packages:\x1b[0m`
               );
-              data.objects.forEach((pkg: any, index: number) => {
-                terminal.writeln(
-                  `  ${index + 1}. \x1b[36m${pkg.package.name}\x1b[0m@${
-                    pkg.package.version
-                  }`
-                );
-                terminal.writeln(
-                  `     ${pkg.package.description || "No description"}`
-                );
-              });
+              data.objects.forEach(
+                (
+                  pkg: {
+                    package: {
+                      name: string;
+                      version: string;
+                      description?: string;
+                    };
+                  },
+                  index: number
+                ) => {
+                  terminal.writeln(
+                    `  ${index + 1}. \x1b[36m${pkg.package.name}\x1b[0m@${
+                      pkg.package.version
+                    }`
+                  );
+                  terminal.writeln(
+                    `     ${pkg.package.description || "No description"}`
+                  );
+                }
+              );
             } else {
               terminal.writeln(
                 `\x1b[31mNo packages found for '${query}'\x1b[0m`
               );
             }
           } catch (error) {
+            // Handle error
+            console.log("Error searching packages:", error);
+            console.error("Error searching packages:", error);
             terminal.writeln(`\x1b[31m✗\x1b[0m Error searching packages`);
           }
         } else if (args[1] === "fund") {

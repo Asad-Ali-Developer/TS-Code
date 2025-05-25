@@ -5,10 +5,11 @@ import generatePackageJson from "./generatePackageJson";
 import generateReadme from "./generateReadme";
 import { SetStateAction } from "react";
 import createFallbackNextJsProject from "./createFallbackNextJsProject";
+import type { Terminal as XTermTerminal } from "xterm";
 
 const createNextJsProject = async (
   projectName: string,
-  terminal: any,
+  terminal: XTermTerminal,
   setFileSystem: (value: SetStateAction<FileNode[]>) => void
 ) => {
   try {

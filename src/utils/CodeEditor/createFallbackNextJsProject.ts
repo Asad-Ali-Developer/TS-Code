@@ -1,10 +1,11 @@
 import { FileNode } from "@/types";
 import { SetStateAction } from "react";
 import getProjectStructure from "./getProjectStructure";
+import type { Terminal as XTermTerminal } from "xterm";
 
 const createFallbackNextJsProject = async (
   projectName: string,
-  terminal: any,
+  terminal: XTermTerminal,
   setFileSystem: (value: SetStateAction<FileNode[]>) => void
 ) => {
   const projectId = `${Date.now()}-project`;

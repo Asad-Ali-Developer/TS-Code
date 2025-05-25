@@ -13,6 +13,8 @@ const CreateRoomButton = ({ userId }: CreateRoomButtonProps) => {
   const [roomName, setRoomName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log("userId:", userId);
+
   async function handleCreateRoom(e: FormEvent) {
     e.preventDefault();
     if (!roomName.trim()) return;

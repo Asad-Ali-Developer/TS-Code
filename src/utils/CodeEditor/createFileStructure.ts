@@ -1,6 +1,7 @@
 import { FileNode, GitHubFile } from "@/types";
 import fetchGitHubRepo from "./fetchGithubRepo";
 import fetchFileContent from "./fileFileContent";
+import type { Terminal as XTermTerminal } from "xterm";
 
 const createFileStructure = async (
   files: GitHubFile[],
@@ -8,10 +9,12 @@ const createFileStructure = async (
   owner: string,
   repo: string,
   basePath = "",
-  terminal: any
+  terminal: XTermTerminal
 ): Promise<FileNode[]> => {
   const nodes: FileNode[] = [];
 
+  console.log("Base Path:", basePath);
+  
   for (const file of files) {
     const nodeId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 

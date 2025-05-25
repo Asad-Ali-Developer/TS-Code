@@ -10,10 +10,6 @@ const HomePageTemplate = () => {
     router.push("/code");
   }
 
-  const handleGetStarted = () => {
-    router.push("/register");
-  };
-
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}

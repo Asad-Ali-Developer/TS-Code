@@ -14,45 +14,18 @@ import {
   terminalGradients,
   vsCodeDarkTheme,
 } from "@/data";
-import { FileNode, OpenFile, PackageInfo } from "@/types";
+import { FileNode, OpenFile } from "@/types";
 import { getLanguageExtension, handleCommand } from "@/utils";
-import { css } from "@codemirror/lang-css";
-import { html } from "@codemirror/lang-html";
-import { javascript } from "@codemirror/lang-javascript";
-import { json } from "@codemirror/lang-json";
-import { markdown } from "@codemirror/lang-markdown";
-import { python } from "@codemirror/lang-python";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { syntaxHighlighting } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
-import { tags } from "@lezer/highlight";
 import { EditorView, basicSetup } from "codemirror";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FiChevronDown,
   FiChevronRight,
-  FiEdit3,
   FiFile,
-  FiFilePlus,
-  FiFolder,
-  FiFolderPlus,
-  FiMaximize2,
-  FiMinimize2,
-  FiRefreshCw,
-  FiSettings,
-  FiTerminal,
-  FiTrash2,
-  FiX,
+  FiFolder
 } from "react-icons/fi";
-import {
-  SiCss3,
-  SiHtml5,
-  SiJavascript,
-  SiJson,
-  SiMarkdown,
-  SiPython,
-  SiReact,
-  SiTypescript,
-} from "react-icons/si";
 import type { Terminal } from "xterm";
 import type { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
@@ -87,6 +60,8 @@ const CodeEditorPage = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [currentCommand, setCurrentCommand] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  console.log("Current Command:", currentCommand);
 
   // Initialize terminal with dynamic imports
   useEffect(() => {
@@ -214,7 +189,7 @@ const CodeEditorPage = () => {
         fitAddonRef.current = null;
       }
     };
-  }, [commandHistory, historyIndex]);
+  }, [commandHistory, historyIndex, fileSystem]);
 
   // Resize terminal when needed
   useEffect(() => {

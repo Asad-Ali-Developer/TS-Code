@@ -2,11 +2,6 @@ import { FileNode } from "@/types";
 import generatePackageJson from "./generatePackageJson";
 import generateReadme from "./generateReadme";
 
-interface ProjectInfo {
-  projectName: string;
-  projectId: string;
-}
-
 const getProjectStructure = async (projectId: string, projectName: string) => {
   const projectStructure: FileNode = {
     id: projectId,
