@@ -319,6 +319,7 @@ const handleCommand = async (
                 });
               }
             } catch (error) {
+              console.log("Error reading package.json:", error);
               terminal.writeln("\x1b[31m✗\x1b[0m Error reading package.json");
             }
           } else {
