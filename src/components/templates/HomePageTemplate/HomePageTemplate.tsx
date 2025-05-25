@@ -1,6 +1,19 @@
+import { useAuth } from "@/providers";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const HomePageTemplate = () => {
+  const { userDetails } = useAuth();
+  const router = useRouter();
+
+  if(userDetails?.email){
+    router.push("/code");
+  }
+
+  const handleGetStarted = () => {
+    router.push("/register");
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -11,7 +24,9 @@ const HomePageTemplate = () => {
               <h1 className="text-4xl font-bold tracking-tight text-emerald-800 sm:text-5xl md:text-6xl">
                 Code together in{" "}
               </h1>
-              <h1 className="text-emerald-600 text-4xl sm:text-5xl md:text-6xl font-bold mt-2">real-time</h1>
+              <h1 className="text-emerald-600 text-4xl sm:text-5xl md:text-6xl font-bold mt-2">
+                real-time
+              </h1>
               <p className="mt-3 text-base text-gray-300 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
                 A collaborative code editor that lets you share your code with
                 others and work together in real-time. Perfect for pair
@@ -19,7 +34,7 @@ const HomePageTemplate = () => {
               </p>
               <div className="mt-8 sm:mx-auto sm:max-w-lg sm:text-center lg:mx-0 lg:text-left">
                 <Link
-                  href="/register"
+                  href="/signup"
                   className="inline-block rounded-md bg-emerald-600 px-8 py-3 text-center text-base font-medium text-white hover:bg-emerald-700"
                 >
                   Get started for free

@@ -40,7 +40,7 @@ const SignInPageTemplate = () => {
       }
 
       setUserDetails(response);
-      router.push("/");
+      router.push("/code");
     } catch (error) {
       console.log(error);
     } finally {
@@ -62,7 +62,7 @@ const SignInPageTemplate = () => {
 
       setUserDetails(response as UserDetails);
 
-      router.push("/");
+      router.push("/code");
     } catch (error) {
       console.log(error);
     } finally {

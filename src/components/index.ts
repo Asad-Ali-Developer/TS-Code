@@ -3,6 +3,7 @@ import DashboardPageTemplate from "./templates/DashboardPageTemplate/DashboardPa
 import RoomPageTemplate from "./templates/RoomPageTemplate/RoomPageTemplate";
 import SignInPageTemplate from "./templates/SignInPageTemplate/SignInPageTemplate";
 import SignUpPageTemplate from "./templates/SignUpPageTemplate/SignUpPageTemplate";
+import CodeEditorPageTemplate from "./templates/CodeEditorPageTemplate/CodeEditorPageTemplate";
 
 export {
   HomePageTemplate,
@@ -10,4 +11,5 @@ export {
   RoomPageTemplate,
   SignInPageTemplate,
   SignUpPageTemplate,
+  CodeEditorPageTemplate,
 };

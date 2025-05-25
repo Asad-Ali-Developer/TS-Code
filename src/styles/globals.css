@@ -7,3 +7,62 @@ body {
   background: #091814;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* Editor container */
+.editor-container {
+  height: 100vh;
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #282c34;
+  overflow-y: auto;
+}
+
+/* File tree */
+.file-tree {
+  padding: 10px;
+}
+
+.file-tree .file-item {
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: background-color 0.2s ease;
+}
+
+.file-tree .file-item:hover {
+  background-color: #30363d;
+}
+
+/* Open files tabs */
+.tabs {
+  background-color: #282c34;
+  border-bottom: 1px solid #4f5b66;
+  overflow-x: auto;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin-right: 4px;
+  background-color: #30363d;
+  color: #d4d4d4;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.tab.active {
+  background-color: #4f5b66;
+  color: #d4d4d4;
+}
+
+/* Editor */
+.editor {
+  flex: 1;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}

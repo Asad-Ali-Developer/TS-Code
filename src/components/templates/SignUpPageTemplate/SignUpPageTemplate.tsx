@@ -78,7 +78,7 @@ const SignUpPageTemplate = () => {
           <h2 className="text-2xl font-semibold text-emerald-500 text-center mb-2">
             Create an account
           </h2>
-          <p className="text-gray-500 text-center text-sm mb-10">
+          <p className="text-gray-200 text-center text-sm mb-10">
             Sign up to get started
           </p>
 

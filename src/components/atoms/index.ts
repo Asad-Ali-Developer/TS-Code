@@ -1,3 +1,5 @@
 import MainLayout from "./MainLayout";
+import DashboardHeader from "./DashboardHeader";
+import CreateRoomButton from "./CreateRoomButton";
 
-export { MainLayout };
+export { MainLayout, DashboardHeader, CreateRoomButton };

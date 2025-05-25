@@ -11,7 +11,7 @@ const Navbar = () => {
   const router = useRouter();
   const { userDetails } = useAuth();
 
-  const isLoggedIn = userDetails?.uid;
+  const isLoggedIn = userDetails?.uid ? true : false;
 
   return (
     <header className="flex h-20 items-center justify-between bg-transparent px-4 md:px-8 lg:px-28">
@@ -34,9 +34,7 @@ const Navbar = () => {
           }}
         >
           <Code className="h-5 w-5 text-emerald-500" />
-          <span className="text-lg font-semibold tracking-tight">
-            CodeSync
-          </span>
+          <span className="text-lg font-semibold tracking-tight">CodeSync</span>
         </div>
       </div>
 
