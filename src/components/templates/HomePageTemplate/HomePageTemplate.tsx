@@ -79,7 +79,7 @@ const HomePageTemplate = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                <h3 className="mt-4 text-lg font-medium text-emerald-600">
                   Real-time Collaboration
                 </h3>
                 <p className="mt-2 text-base text-gray-400">
@@ -106,7 +106,7 @@ const HomePageTemplate = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                <h3 className="mt-4 text-lg font-medium text-emerald-600">
                   Shareable Rooms
                 </h3>
                 <p className="mt-2 text-base text-gray-400">
@@ -133,7 +133,7 @@ const HomePageTemplate = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                <h3 className="mt-4 text-lg font-medium text-emerald-600">
                   Secure Authentication
                 </h3>
                 <p className="mt-2 text-base text-gray-400">

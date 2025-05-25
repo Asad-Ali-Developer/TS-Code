@@ -25,8 +25,8 @@ const TabsForEditor: FC<TabsForEditorProps> = ({
               key={file.id}
               className={`flex items-center px-4 py-3 border-r border-emerald-900 cursor-pointer min-w-0 transition-colors duration-150 ${
                 activeFileId === file.id
-                  ? "bg-emerald-900/30"
-                  : "bg-emerald-950 hover:bg-gray-750"
+                  ? "bg-emerald-900/50 border-t-4 border-t-emerald-500"
+                  : "bg-emerald-900/20 hover:bg-gray-750"
               }`}
               onClick={() => setActiveFileId(file.id)}
             >

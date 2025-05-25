@@ -40,7 +40,7 @@ const SidebarForEditor: FC<SidebarForEditorProps> = ({
   return (
     <div>
       <div className="w-80 bg-emerald-950/90 border-r border-gray-700 flex flex-col shadow-xl h-screen">
-        <div className="p-4 border-b border-emerald-950 bg-gradient-to-r from-emerald-950 to-emerald-950">
+        <div className="p-4 border-b border-emerald-800 bg-gradient-to-r from-emerald-950 to-emerald-950 mb-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-gray-200 flex items-center">
               <FiFolder className="mr-2 text-emerald-500" />

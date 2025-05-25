@@ -3,10 +3,15 @@ import { Dispatch, SetStateAction } from "react";
 import createNextJsProject from "./createNextJsProject";
 import fetchNpmPackageInfo from "./fetchNPMPackInfo";
 import findPackageJson from "./findPackagJson";
-import type { Terminal as XTermTerminal } from "xterm";
 
 type ItemType = "file" | "folder";
 
+// Import Terminal type from xterm.js
+import type { Terminal as XTermTerminal } from "xterm";
+
+/**
+ * Handles terminal commands like npm, git, ls, cd, etc.
+ */
 const handleCommand = async (
   command: string,
   terminal: XTermTerminal,
@@ -20,7 +25,7 @@ const handleCommand = async (
   setIsLoading(true);
   terminal.write("\r\n");
 
-  const args = command.split(" ");
+  const args = command.trim().split(" ");
   const cmd = args[0].toLowerCase();
 
   try {
@@ -28,13 +33,13 @@ const handleCommand = async (
       case "help":
         terminal.writeln("📚 \x1b[1;33mAvailable Commands:\x1b[0m");
         terminal.writeln(
-          "  \x1b[36mnpx create-next-app <name>\x1b[0m - Create real Next.js app from GitHub"
+          "  \x1b[36mnpx create-next-app <name>\x1b[0m - Create Next.js app"
         );
         terminal.writeln(
           "  \x1b[36mnpx create-react-app <name>\x1b[0m - Create React app"
         );
         terminal.writeln(
-          "  \x1b[36mnpm install / npm i\x1b[0m       - Install all dependencies"
+          "  \x1b[36mnpm install / npm i\x1b[0m       - Install dependencies"
         );
         terminal.writeln(
           "  \x1b[36mnpm install <package>\x1b[0m     - Install specific package"
@@ -46,19 +51,7 @@ const handleCommand = async (
           "  \x1b[36mnpm run <script>\x1b[0m          - Run package script"
         );
         terminal.writeln(
-          "  \x1b[36mnpm search <query>\x1b[0m        - Search npm packages"
-        );
-        terminal.writeln(
-          "  \x1b[36mnpm audit\x1b[0m                 - Check vulnerabilities"
-        );
-        terminal.writeln(
-          "  \x1b[36mpip install <package>\x1b[0m     - Install Python package"
-        );
-        terminal.writeln(
-          "  \x1b[36myarn install\x1b[0m              - Install with Yarn"
-        );
-        terminal.writeln(
-          "  \x1b[36mls\x1b[0m / \x1b[36mdir\x1b[0m                - List directory contents"
+          "  \x1b[36mls / dir\x1b[0m                - List directory contents"
         );
         terminal.writeln(
           "  \x1b[36mcd <directory>\x1b[0m           - Change directory"
@@ -84,10 +77,6 @@ const handleCommand = async (
         terminal.writeln(
           "  \x1b[36mgit status\x1b[0m               - Show git status"
         );
-        terminal.writeln("");
-        terminal.writeln(
-          "🌐 \x1b[1;32mThis terminal fetches real data from the internet!\x1b[0m"
-        );
         break;
 
       case "npx":
@@ -105,18 +94,6 @@ const handleCommand = async (
           terminal.writeln(
             `\x1b[31m✗\x1b[0m npx: command '${args[1]}' not found`
           );
-          terminal.writeln("Try: npx create-next-app <project-name>");
-        }
-        break;
-
-      case "yarn":
-        if (args[1] === "install" || args[1] === "add") {
-          const packageName = args[2] || "dependencies";
-          terminal.writeln(`🧶 Yarn install ${packageName}...`);
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-          terminal.writeln(`\x1b[32m✓\x1b[0m Done in 2.34s.`);
-        } else {
-          terminal.writeln("Usage: yarn install | yarn add <package>");
         }
         break;
 
@@ -126,7 +103,6 @@ const handleCommand = async (
             // Install specific package
             const packageName = args[2];
             terminal.writeln(`📦 Installing ${packageName}...`);
-
             const packageInfo = await fetchNpmPackageInfo(packageName);
             if (packageInfo) {
               terminal.writeln(
@@ -135,62 +111,28 @@ const handleCommand = async (
               terminal.writeln(
                 `  ${packageInfo.description || "No description available"}`
               );
-
               await new Promise((resolve) => setTimeout(resolve, 1500));
               terminal.writeln(
                 `\x1b[32m✓\x1b[0m Successfully installed ${packageName}@${packageInfo.version}`
               );
-
-              setFileSystem((prev) => {
-                const newFileSystem = [...prev];
-                const packageJsonIndex = newFileSystem.findIndex(
-                  (node) => node.name === "package.json"
-                );
-
-                if (packageJsonIndex !== -1) {
-                  try {
-                    const packageJson = JSON.parse(
-                      newFileSystem[packageJsonIndex].content || "{}"
-                    );
-                    packageJson.dependencies = packageJson.dependencies || {};
-                    packageJson.dependencies[
-                      packageName
-                    ] = `^${packageInfo.version}`;
-
-                    newFileSystem[packageJsonIndex] = {
-                      ...newFileSystem[packageJsonIndex],
-                      content: JSON.stringify(packageJson, null, 2),
-                    };
-                  } catch (error) {
-                    console.error("Error updating package.json:", error);
-                  }
-                }
-                return newFileSystem;
-              });
+              updatePackageJson(
+                setFileSystem,
+                packageName,
+                packageInfo.version
+              );
             } else {
               terminal.writeln(
                 `\x1b[31m✗\x1b[0m Package '${packageName}' not found`
               );
             }
           } else {
-            // Install all dependencies from package.json
+            // Install all dependencies
             terminal.writeln("📦 Installing dependencies from package.json...");
-
-            // Find package.json in current directory or any project folder
-            let packageJsonNode = null;
-
-            packageJsonNode = findPackageJson(fileSystem);
-
+            const packageJsonNode = findPackageJson(fileSystem);
             if (!packageJsonNode || !packageJsonNode.content) {
-              terminal.writeln(
-                "\x1b[31m✗\x1b[0m No package.json found in current directory"
-              );
-              terminal.writeln(
-                "Run \x1b[36mnpm init\x1b[0m to create a package.json file"
-              );
+              terminal.writeln("\x1b[31m✗\x1b[0m No package.json found");
               break;
             }
-
             try {
               const packageJson = JSON.parse(packageJsonNode.content);
               const dependencies = {
@@ -198,26 +140,20 @@ const handleCommand = async (
                 ...packageJson.devDependencies,
               };
               const depCount = Object.keys(dependencies).length;
-
               if (depCount === 0) {
                 terminal.writeln(
                   "\x1b[33m⚠\x1b[0m No dependencies found in package.json"
                 );
-                terminal.writeln(
-                  "\x1b[32m✓\x1b[0m up to date, audited 0 packages in 0.5s"
-                );
+                terminal.writeln("\x1b[32m✓\x1b[0m up to date");
                 break;
               }
 
               terminal.writeln(`Found ${depCount} dependencies to install:`);
-
-              // Show dependencies being installed
               const depNames = Object.keys(dependencies);
               for (let i = 0; i < Math.min(depNames.length, 5); i++) {
                 const dep = depNames[i];
                 terminal.writeln(`  📦 ${dep}@${dependencies[dep]}`);
               }
-
               if (depNames.length > 5) {
                 terminal.writeln(
                   `  ... and ${depNames.length - 5} more packages`
@@ -226,21 +162,14 @@ const handleCommand = async (
 
               terminal.writeln("");
               terminal.writeln("📥 Downloading packages...");
-
-              // Simulate installation progress
               await new Promise((resolve) => setTimeout(resolve, 1000));
               terminal.writeln("🔧 Building fresh packages...");
-
               await new Promise((resolve) => setTimeout(resolve, 1500));
-              terminal.writeln("📝 Writing lock file...");
 
-              await new Promise((resolve) => setTimeout(resolve, 500));
-
-              // Create node_modules folder and package-lock.json
+              // Create node_modules and package-lock.json
               const projectNode = fileSystem.find((node) =>
                 node.children?.some((child) => child.name === "package.json")
               );
-
               if (projectNode) {
                 setFileSystem((prev) => {
                   return prev.map((node) => {
@@ -264,7 +193,6 @@ const handleCommand = async (
                           isOpen: false,
                         });
                       }
-
                       if (!hasPackageLock) {
                         newChildren.push({
                           id: `${Date.now()}-package-lock`,
@@ -314,16 +242,13 @@ const handleCommand = async (
             } catch (error) {
               console.error("Error parsing package.json:", error);
               terminal.writeln("\x1b[31m✗\x1b[0m Error parsing package.json");
-              terminal.writeln("Make sure package.json contains valid JSON");
             }
           }
         } else if (args[1] === "init") {
           terminal.writeln("📝 Creating package.json...");
-
-          const projectName = "my-project";
           const packageJsonContent = JSON.stringify(
             {
-              name: projectName,
+              name: "my-project",
               version: "1.0.0",
               description: "",
               main: "index.js",
@@ -337,10 +262,7 @@ const handleCommand = async (
             null,
             2
           );
-
           createNewItem("root", "file", "package.json");
-
-          // Update the created package.json with content
           setTimeout(() => {
             setFileSystem((prev) => {
               return prev.map((node) => {
@@ -351,13 +273,11 @@ const handleCommand = async (
               });
             });
           }, 100);
-
           terminal.writeln("\x1b[32m✓\x1b[0m Created package.json");
         } else if (args[1] === "run" && args[2]) {
           const script = args[2];
           terminal.writeln(`🚀 Running script: ${script}`);
 
-          // Find package.json and check for scripts
           const packageJsonNode = fileSystem.find(
             (node) => node.name === "package.json"
           );
@@ -365,17 +285,13 @@ const handleCommand = async (
             try {
               const packageJson = JSON.parse(packageJsonNode.content);
               const scripts = packageJson.scripts || {};
-
               if (scripts[script]) {
                 terminal.writeln(
-                  `> ${packageJson.name || "project"}@${
-                    packageJson.version || "1.0.0"
-                  } ${script}`
+                  `> ${packageJson.name || "project"}@1.0.0 ${script}`
                 );
                 terminal.writeln(`> ${scripts[script]}`);
                 terminal.writeln("");
 
-                // Simulate script execution
                 if (script === "dev" || script === "start") {
                   terminal.writeln("🌐 Starting development server...");
                   await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -403,82 +319,13 @@ const handleCommand = async (
                 });
               }
             } catch (error) {
-              console.error("Error reading package.json:", error);
               terminal.writeln("\x1b[31m✗\x1b[0m Error reading package.json");
             }
           } else {
             terminal.writeln("\x1b[31m✗\x1b[0m No package.json found");
           }
-        } else if (args[1] === "search" && args[2]) {
-          const query = args.slice(2).join(" ");
-          terminal.writeln(`🔍 Searching npm for '${query}'...`);
-
-          try {
-            const response = await fetch(
-              `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(
-                query
-              )}&size=5`
-            );
-            const data = await response.json();
-
-            if (data.objects && data.objects.length > 0) {
-              terminal.writeln(
-                `\x1b[33mFound ${data.objects.length} packages:\x1b[0m`
-              );
-              data.objects.forEach(
-                (
-                  pkg: {
-                    package: {
-                      name: string;
-                      version: string;
-                      description?: string;
-                    };
-                  },
-                  index: number
-                ) => {
-                  terminal.writeln(
-                    `  ${index + 1}. \x1b[36m${pkg.package.name}\x1b[0m@${
-                      pkg.package.version
-                    }`
-                  );
-                  terminal.writeln(
-                    `     ${pkg.package.description || "No description"}`
-                  );
-                }
-              );
-            } else {
-              terminal.writeln(
-                `\x1b[31mNo packages found for '${query}'\x1b[0m`
-              );
-            }
-          } catch (error) {
-            // Handle error
-            console.log("Error searching packages:", error);
-            console.error("Error searching packages:", error);
-            terminal.writeln(`\x1b[31m✗\x1b[0m Error searching packages`);
-          }
-        } else if (args[1] === "fund") {
-          terminal.writeln("💰 Funding information:");
-          terminal.writeln("Some packages are looking for funding.");
-          terminal.writeln(
-            "Visit https://github.com/sponsors to support open source projects."
-          );
-        } else if (args[1] === "audit") {
-          terminal.writeln("🔍 Auditing packages for vulnerabilities...");
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-          terminal.writeln("✓ found 0 vulnerabilities");
-          terminal.writeln("📊 Scanned 0 packages for known vulnerabilities");
         } else {
-          terminal.writeln("Usage:");
-          terminal.writeln("  npm install [package]  - Install package(s)");
-          terminal.writeln("  npm i [package]        - Shorthand for install");
-          terminal.writeln("  npm init               - Create package.json");
-          terminal.writeln("  npm run <script>       - Run package script");
-          terminal.writeln("  npm search <query>     - Search packages");
-          terminal.writeln("  npm fund               - Show funding info");
-          terminal.writeln(
-            "  npm audit              - Check for vulnerabilities"
-          );
+          terminal.writeln("Usage: npm install [package]");
         }
         break;
 
@@ -554,25 +401,18 @@ const handleCommand = async (
       case "cls":
         terminal.clear();
         terminal.writeln("🚀 \x1b[1;35mAdvanced Web Terminal\x1b[0m");
-        terminal.writeln("📦 Real project creation with GitHub templates!");
         terminal.writeln("💡 Type 'help' for available commands");
         terminal.writeln("🌐 Fetches real data from the internet");
         break;
 
       case "node":
-        if (args[1] === "-v" || args[1] === "--version") {
-          terminal.writeln("v18.17.0");
-        } else {
-          terminal.writeln("Usage: node -v");
-        }
+        if (args[1] === "-v") terminal.writeln("v18.17.0");
+        else terminal.writeln("Usage: node -v");
         break;
 
       case "python":
-        if (args[1] === "--version") {
-          terminal.writeln("Python 3.11.0");
-        } else {
-          terminal.writeln("Usage: python --version");
-        }
+        if (args[1] === "--version") terminal.writeln("Python 3.11.0");
+        else terminal.writeln("Usage: python --version");
         break;
 
       case "git":
@@ -615,5 +455,35 @@ const handleCommand = async (
   setIsLoading(false);
   terminal.write("\r\n\x1b[1;36m$\x1b[0m ");
 };
+
+// Helper function to update package.json after installing a package
+function updatePackageJson(
+  setFileSystem: Dispatch<SetStateAction<FileNode[]>>,
+  packageName: string,
+  version: string
+) {
+  setFileSystem((prev) => {
+    const newFileSystem = [...prev];
+    const packageJsonIndex = newFileSystem.findIndex(
+      (node) => node.name === "package.json"
+    );
+    if (packageJsonIndex !== -1) {
+      try {
+        const packageJson = JSON.parse(
+          newFileSystem[packageJsonIndex].content || "{}"
+        );
+        packageJson.dependencies = packageJson.dependencies || {};
+        packageJson.dependencies[packageName] = `^${version}`;
+        newFileSystem[packageJsonIndex] = {
+          ...newFileSystem[packageJsonIndex],
+          content: JSON.stringify(packageJson, null, 2),
+        };
+      } catch (e) {
+        console.error("Failed to update package.json:", e);
+      }
+    }
+    return newFileSystem;
+  });
+}
 
 export default handleCommand;
