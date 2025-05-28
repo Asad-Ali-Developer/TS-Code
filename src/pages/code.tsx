@@ -7,6 +7,7 @@ const code = () => {
       <Head>
         <title>Code - TS Code</title>
       </Head>
+      {/* Xode Editor */}
       <CodeEditorPageTemplate />
     </div>
   );
