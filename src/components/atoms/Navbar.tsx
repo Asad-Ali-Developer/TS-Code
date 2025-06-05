@@ -4,14 +4,20 @@ import { useAuth } from "@/providers";
 import { Code, GitBranch, Menu, Save, Settings, Share2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import CreateRoomButton from "./CreateRoomButton";
+import JoinRoomModal from "./JoinRoomModal";
+import JoinedRoomMembersModal from "./JoinedRoomMembersModal";
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [roomId, setRoomId] = useState("");
+
   const router = useRouter();
   const { userDetails } = useAuth();
-
-  const isLoggedIn = userDetails?.uid ? true : false;
+  const isLoggedIn = !!userDetails?.uid;
 
   return (
     <header className="flex h-20 items-center justify-between bg-transparent px-4 md:px-8 lg:px-28">
@@ -91,10 +97,30 @@ const Navbar = () => {
             )}
           </div>
 
+          <CreateRoomButton />
+
           {/* Share Button */}
           <button className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 focus:outline-none">
             <Share2 className="h-4 w-4" />
             <span>Share</span>
+          </button>
+
+          {/* Join Room Button */}
+          <button
+            className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 focus:outline-none"
+            onClick={() => setShowJoinModal(true)}
+          >
+            Join Room
+          </button>
+
+          {/* See Joined Members Button */}
+          <button
+            className="flex items-center gap-1.5 rounded-md bg-purple-600 px-3 py-1.5 text-sm text-white hover:bg-purple-700 focus:outline-none"
+            onClick={() => setShowMembersModal(true)}
+            disabled={!roomId}
+            title={!roomId ? "Join a room first" : ""}
+          >
+            See Joined Members
           </button>
         </div>
       ) : (
@@ -190,6 +216,22 @@ const Navbar = () => {
                     <Share2 className="h-4 w-4" />
                     <span>Share</span>
                   </button>
+                  {/* Join Room Button */}
+                  <button
+                    className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 focus:outline-none"
+                    onClick={() => setShowJoinModal(true)}
+                  >
+                    Join Room
+                  </button>
+                  {/* See Joined Members Button */}
+                  <button
+                    className="flex items-center gap-1.5 rounded-md bg-purple-600 px-3 py-1.5 text-sm text-white hover:bg-purple-700 focus:outline-none"
+                    onClick={() => setShowMembersModal(true)}
+                    disabled={!roomId}
+                    title={!roomId ? "Join a room first" : ""}
+                  >
+                    See Joined Members
+                  </button>
                 </>
               ) : (
                 <>
@@ -218,6 +260,22 @@ const Navbar = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Join Room Modal */}
+      {showJoinModal && (
+        <JoinRoomModal
+          setShowJoinModal={setShowJoinModal}
+          setRoomId={setRoomId}
+        />
+      )}
+
+      {/* Joined Members Modal */}
+      {showMembersModal && (
+        <JoinedRoomMembersModal
+          showMembersModal={showMembersModal}
+          setShowMembersModal={setShowMembersModal}
+        />
       )}
     </header>
   );

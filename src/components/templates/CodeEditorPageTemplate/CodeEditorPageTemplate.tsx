@@ -14,6 +14,7 @@ import {
   terminalGradients,
   vsCodeDarkTheme,
 } from "@/data";
+import { FileSystemService } from "@/services";
 import { FileNode, OpenFile } from "@/types";
 import { getLanguageExtension, handleCommand } from "@/utils";
 import { syntaxHighlighting } from "@codemirror/language";
@@ -24,7 +25,7 @@ import {
   FiChevronDown,
   FiChevronRight,
   FiFile,
-  FiFolder
+  FiFolder,
 } from "react-icons/fi";
 import type { Terminal } from "xterm";
 import type { FitAddon } from "xterm-addon-fit";
@@ -62,6 +63,8 @@ const CodeEditorPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   console.log("Current Command:", currentCommand);
+
+  const fileSystemService = new FileSystemService(fileSystem, setFileSystem);
 
   // Initialize terminal with dynamic imports
   useEffect(() => {
@@ -470,9 +473,7 @@ const CodeEditorPage = () => {
           style={{
             paddingLeft: `${level * 16 + 8}px`,
             backgroundColor:
-              activeFileId === node.id
-                ? "#073c2e"
-                : "transparent",
+              activeFileId === node.id ? "#073c2e" : "transparent",
           }}
           onClick={() => {
             if (node.type === "folder") {
@@ -501,7 +502,10 @@ const CodeEditorPage = () => {
             </span>
           )}
           {node.type === "folder" ? (
-            <FiFolder className="mr-2 text-emerald-500 flex-shrink-0" size={16} />
+            <FiFolder
+              className="mr-2 text-emerald-500 flex-shrink-0"
+              size={16}
+            />
           ) : (
             getFileIcon(node.name)
           )}
