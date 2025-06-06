@@ -24,6 +24,7 @@ const createNextJsProject = async (
       "examples/hello-world"
     );
 
+    // If the template is empty, fallback to a simpler template
     if (files.length === 0) {
       // Fallback to a simpler template
       terminal.writeln("⚠️  Using fallback template...");
