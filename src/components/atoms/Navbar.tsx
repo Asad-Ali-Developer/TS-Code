@@ -1,21 +1,25 @@
 "use client";
 import { useAuth, useJoinedRoomId } from "@/providers";
-import { Code, GitBranch, Menu, Save, Share2, UserPlus, X } from "lucide-react";
+import { CodeService } from "@/services";
+import { Code, Menu, UserPlus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CreateRoomButton from "./CreateRoomButton";
 import JoinRoomModal from "./JoinRoomModal";
 import JoinedRoomMembersModal from "./JoinedRoomMembersModal";
-import { CodeService } from "@/services";
+import { MdDeleteOutline } from "react-icons/md";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [deleteRoomLoading, setDeleteRoomLoading] = useState<boolean>(false);
+  const [leaveRoomLoading, setLeaveRoomLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const { userDetails } = useAuth();
-  const { newJoinedRoomId, roomDetails } = useJoinedRoomId();
+  const { newJoinedRoomId, roomDetails, setRoomDetails, setNewJoinedRoomId } =
+    useJoinedRoomId();
   const codeService = new CodeService();
 
   const isLoggedIn = !!userDetails?.uid;
@@ -24,20 +28,32 @@ const Navbar = () => {
   const handleLeaveRoom = async () => {
     if (!userDetails?.uid || !newJoinedRoomId) return;
     try {
+      setLeaveRoomLoading(true);
       await codeService.removeUserFromRoom(newJoinedRoomId, userDetails.uid);
+      setNewJoinedRoomId(null);
+      setRoomDetails(null);
+      // router.refresh();
       localStorage.removeItem("newJoinedRoomId");
     } catch (error) {
       console.error("Failed to leave room:", error);
+    } finally {
+      setLeaveRoomLoading(false);
     }
   };
 
   const handleDeleteRoomIfOwner = async () => {
     if (!userDetails?.uid || !newJoinedRoomId) return;
     try {
+      setDeleteRoomLoading(true);
       await codeService.deleteRoomIfOwner(newJoinedRoomId, userDetails.uid);
+      setNewJoinedRoomId(null);
+      setRoomDetails(null);
+      // router.refresh();
       localStorage.removeItem("newJoinedRoomId");
     } catch (error) {
       console.error("Failed to delete room:", error);
+    } finally {
+      setDeleteRoomLoading(false);
     }
   };
 
@@ -89,23 +105,24 @@ const Navbar = () => {
               <span>See Members</span>
             </button>
           )}
-          {newJoinedRoomId && (
+          {newJoinedRoomId && !ownerOfRoom && (
             <button
               type="button"
               className="flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 focus:outline-none"
               onClick={handleLeaveRoom}
             >
-              <X className="h-4 w-4" />
+              <MdDeleteOutline className="h-4 w-4" />
               <span>Leave Room</span>
             </button>
           )}
+
           {newJoinedRoomId && ownerOfRoom && (
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-md bg-rose-600 px-3 py-1.5 text-sm text-white hover:bg-rose-700 focus:outline-none"
+              className="flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 focus:outline-none"
               onClick={handleDeleteRoomIfOwner}
             >
-              <X className="h-4 w-4" />
+              <MdDeleteOutline className="h-4 w-4" />
               <span>Delete Room</span>
             </button>
           )}
