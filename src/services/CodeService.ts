@@ -1,4 +1,4 @@
-import { Room } from "@/types";
+import type { Room } from "@/types";
 import {
   addDoc,
   collection,
@@ -9,10 +9,12 @@ import {
   updateDoc,
   arrayUnion,
   onSnapshot,
-  Unsubscribe,
-  DocumentData,
+  type Unsubscribe,
+  type DocumentData,
+  deleteDoc,
 } from "firebase/firestore";
 import { firebaseDB } from "./FirebaseService";
+import { FirebaseFileSystemService } from "./FileSystemService";
 
 class CodeService {
   constructor() {}
@@ -43,6 +45,10 @@ class CodeService {
       { roomId: docRef.id },
       { merge: true }
     );
+
+    // Initialize the file system for this room
+    const fileSystemService = FirebaseFileSystemService.getInstance();
+    await fileSystemService.initializeRoomFileSystem(docRef.id);
 
     return {
       success: true,
@@ -110,6 +116,95 @@ class CodeService {
         callback([]);
       }
     });
+  }
+
+  /**
+   * Get room details by ID
+   */
+  async getRoomDetails(roomId: string): Promise<DocumentData | null> {
+    try {
+      const roomRef = doc(firebaseDB, "app_code_rooms", roomId);
+      const roomSnap = await getDoc(roomRef);
+
+      if (roomSnap.exists()) {
+        return roomSnap.data();
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting room details:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Removes a user from the members array of a room.
+   * @param roomId ID of the room
+   * @param userId ID of the user to remove
+   */
+  async removeUserFromRoom(roomId: string, userId: string): Promise<void> {
+    const roomRef = doc(firebaseDB, "app_code_rooms", roomId);
+
+    try {
+      const roomSnap = await getDoc(roomRef);
+
+      if (!roomSnap.exists()) {
+        throw new Error(`Room with ID ${roomId} does not exist`);
+      }
+
+      const data = roomSnap.data();
+      const members = data.members || [];
+
+      if (!Array.isArray(members)) {
+        throw new Error("Members field is not an array");
+      }
+
+      // Filter out the user
+      const updatedMembers = members.filter((id: string) => id !== userId);
+
+      // Update the document
+      await updateDoc(roomRef, {
+        members: updatedMembers,
+      });
+
+      console.log(`User ${userId} removed from room ${roomId}`);
+    } catch (error) {
+      console.error("Error removing user from room:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes the room if the given user is the owner.
+   *
+   * @param roomId ID of the room
+   * @param userId ID of the user trying to delete the room
+   */
+  async deleteRoomIfOwner(roomId: string, userId: string): Promise<void> {
+    const roomRef = doc(firebaseDB, "app_code_rooms", roomId);
+
+    try {
+      const roomSnap = await getDoc(roomRef);
+
+      if (!roomSnap.exists()) {
+        throw new Error(`Room with ID ${roomId} does not exist`);
+      }
+
+      const data = roomSnap.data();
+
+      // Only allow deletion if user is the owner
+      if (data.ownerId === userId) {
+        await deleteDoc(roomRef); // ✅ Make sure deleteDoc is imported
+        console.log(`Room ${roomId} deleted by owner ${userId}`);
+      } else {
+        console.warn(
+          `User ${userId} is not the owner of room ${roomId}. Deletion canceled.`
+        );
+        throw new Error("Only the room owner can delete the room.");
+      }
+    } catch (error) {
+      console.error("Error deleting room:", error);
+      throw error;
+    }
   }
 }
 

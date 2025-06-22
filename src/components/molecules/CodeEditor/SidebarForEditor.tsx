@@ -1,141 +1,124 @@
-import { FileNode } from "@/types";
-import React, { FC, JSX, SetStateAction } from "react";
-import {
-  FiFolder,
-  FiFilePlus,
-  FiFolderPlus,
-  FiRefreshCw,
-  FiFile,
-} from "react-icons/fi";
+"use client";
 
-type FileType = "file" | "folder";
+import type React from "react";
+
+import type { FileNode } from "@/types";
+import { FiPlus, FiUsers } from "react-icons/fi";
 
 interface SidebarForEditorProps {
   setIsCreating: (
-    value: SetStateAction<{
-      parentId: string;
-      type: FileType;
-    } | null>
+    value: { parentId: string; type: "file" | "folder" } | null
   ) => void;
-  renderFileTree: (nodes: FileNode[], level?: number) => JSX.Element[];
-  isCreating: {
-    parentId: string;
-    type: FileType;
-  } | null;
-  setNewItemName: (value: SetStateAction<string>) => void;
-  newItemName: string;
-  createNewItem: (parentId: string, type: FileType, name: string) => void;
+  renderFileTree: (nodes: FileNode[], level?: number) => React.ReactNode;
+  isCreating: { parentId: string; type: "file" | "folder" } | null;
   fileSystem: FileNode[];
+  setNewItemName: (name: string) => void;
+  newItemName: string;
+  createNewItem: (
+    parentId: string,
+    type: "file" | "folder",
+    name: string
+  ) => void;
+  roomInfo?: {
+    roomId: string;
+    roomName: string;
+    memberCount: number;
+  };
 }
 
-const SidebarForEditor: FC<SidebarForEditorProps> = ({
+export const SidebarForEditor = ({
   setIsCreating,
   renderFileTree,
   isCreating,
+  fileSystem,
   setNewItemName,
   newItemName,
   createNewItem,
-  fileSystem,
-}) => {
+  roomInfo,
+}: SidebarForEditorProps) => {
   return (
-    <div>
-      <div className="w-80 bg-emerald-950/90 border-r border-gray-700 flex flex-col shadow-xl h-screen">
-        <div className="p-4 border-b border-emerald-800 bg-gradient-to-r from-emerald-950 to-emerald-950 mb-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-200 flex items-center">
-              <FiFolder className="mr-2 text-emerald-500" />
-              EXPLORER
-            </h2>
-            <div className="flex space-x-1">
-              <button
-                type="button"
-                onClick={() =>
-                  setIsCreating({ parentId: "root", type: "file" })
-                }
-                className="p-2 hover:bg-emerald-900 rounded-lg transition-colors duration-150"
-                title="New File"
-              >
-                <FiFilePlus
-                  size={16}
-                  className="text-gray-400"
-                />
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setIsCreating({ parentId: "root", type: "folder" })
-                }
-                className="p-2 hover:bg-emerald-900 rounded-lg transition-colors duration-150"
-                title="New Folder"
-              >
-                <FiFolderPlus
-                  size={16}
-                  className="text-gray-400"
-                />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  localStorage.removeItem("vscode-filesystem");
-                  window.location.reload();
-                }}
-                className="p-2 hover:bg-emerald-900 rounded-lg transition-colors duration-150"
-                title="Refresh"
-              >
-                <FiRefreshCw
-                  size={16}
-                  className="text-gray-400"
-                />
-              </button>
+    <div className="w-80 bg-[#0a1f1a] border-r border-emerald-800 flex flex-col">
+      {/* Room Info Header */}
+      {roomInfo && (
+        <div className="p-4 border-b border-emerald-800">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-emerald-400">
+              Room: {roomInfo.roomName}
+            </h3>
+            <div className="flex items-center gap-1 text-xs text-gray-400">
+              <FiUsers size={12} />
+              <span>{roomInfo.memberCount}</span>
             </div>
           </div>
+          <p className="text-xs text-gray-500 font-mono">{roomInfo.roomId}</p>
         </div>
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-          {renderFileTree(fileSystem)}
-          {isCreating?.parentId === "root" && (
-            <div className="flex items-center py-1.5 px-2">
-              {isCreating.type === "folder" ? (
-                <FiFolder className="mr-2 text-emerald-500" size={16} />
-              ) : (
-                <FiFile className="mr-2 text-emerald-500" size={16} />
-              )}
-              <input
-                type="text"
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-                onBlur={() => {
+      )}
+
+      {/* File Explorer Header */}
+      <div className="flex items-center justify-between p-4 border-b border-emerald-800">
+        <h3 className="text-sm font-semibold text-emerald-400">Explorer</h3>
+        <div className="flex gap-1">
+          <button
+            onClick={() => setIsCreating({ parentId: "root", type: "file" })}
+            className="p-1 hover:bg-emerald-800 rounded text-gray-400 hover:text-white transition-colors"
+            title="New File"
+          >
+            <FiPlus size={14} />
+          </button>
+          <button
+            onClick={() => setIsCreating({ parentId: "root", type: "folder" })}
+            className="p-1 hover:bg-emerald-800 rounded text-gray-400 hover:text-white transition-colors"
+            title="New Folder"
+          >
+            <FiPlus size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* File Tree */}
+      <div className="flex-1 overflow-y-auto">
+        {fileSystem.length > 0 ? (
+          renderFileTree(fileSystem)
+        ) : (
+          <div className="p-4 text-center text-gray-500">
+            <p className="text-sm">No files yet</p>
+            <p className="text-xs mt-1">Create your first file or folder</p>
+          </div>
+        )}
+
+        {/* Root level creation */}
+        {isCreating?.parentId === "root" && (
+          <div className="flex items-center py-1.5 px-2 ml-2">
+            <input
+              type="text"
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+              onBlur={() => {
+                if (newItemName.trim()) {
+                  createNewItem("root", isCreating.type, newItemName.trim());
+                }
+                setIsCreating(null);
+                setNewItemName("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
                   if (newItemName.trim()) {
                     createNewItem("root", isCreating.type, newItemName.trim());
                   }
                   setIsCreating(null);
                   setNewItemName("");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    if (newItemName.trim()) {
-                      createNewItem(
-                        "root",
-                        isCreating.type,
-                        newItemName.trim()
-                      );
-                    }
-                    setIsCreating(null);
-                    setNewItemName("");
-                  } else if (e.key === "Escape") {
-                    setIsCreating(null);
-                    setNewItemName("");
-                  }
-                }}
-                className="bg-emerald-900 text-white px-2 py-1 rounded text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder={`New ${isCreating.type}...`}
-                autoFocus
-              />
-            </div>
-          )}
-        </div>
+                } else if (e.key === "Escape") {
+                  setIsCreating(null);
+                  setNewItemName("");
+                }
+              }}
+              className="bg-emerald-700 text-white px-2 py-1 rounded text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder={`New ${isCreating.type}...`}
+              autoFocus
+            />
+          </div>
+        )}
       </div>
     </div>
   );
 };
-
-export default SidebarForEditor;

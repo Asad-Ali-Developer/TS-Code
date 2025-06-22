@@ -1,5 +1,5 @@
 import AuthService from "./AuthService";
 import CodeService from "./CodeService";
-import FileSystemService from "./FileSystemService";
+import { FirebaseFileSystemService } from "./FileSystemService";
 
-export { AuthService, CodeService, FileSystemService };
+export { AuthService, CodeService, FirebaseFileSystemService };

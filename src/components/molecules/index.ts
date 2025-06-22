@@ -1,6 +1,6 @@
 import RoomsList from "./RoomsList";
 import UsersList from "./UserList";
-import SidebarForEditor from "./CodeEditor/SidebarForEditor";
+import { SidebarForEditor } from "./CodeEditor/SidebarForEditor";
 import TabsForEditor from "./CodeEditor/TabsForEditor";
 import EditorSpaceForEditor from "./CodeEditor/EditorSpaceForEditor";
 import TerminalForEditor from "./CodeEditor/TerminalForEditor";

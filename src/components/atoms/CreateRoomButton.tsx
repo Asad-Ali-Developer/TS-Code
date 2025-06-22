@@ -78,6 +78,7 @@ const CreateRoomButton = () => {
   return (
     <>
       <button
+        type="button"
         onClick={() => setIsCreateDialogOpen(true)}
         className="group relative overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 p-px font-medium text-white shadow-lg transition-all duration-300 hover:shadow-emerald-500/25"
       >
@@ -249,6 +250,7 @@ const CreateRoomButton = () => {
 
             <div className="mt-6 flex gap-3">
               <button
+                type="button"
                 onClick={handleShareRoom}
                 className="flex-1 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-500 hover:bg-emerald-500/20 transition-colors"
               >

@@ -8,6 +8,7 @@ import handleCommand from "./CodeEditor/handleCommand";
 import getLanguageExtension from "./CodeEditor/getLanguageExtension";
 import createFallbackNextJsProject from "./CodeEditor/createFallbackNextJsProject";
 import createNextJsProject from "./CodeEditor/createNextJsProject";
+import { handleCommandWithFirebase } from "./CodeEditor/TerminalFirebaseHandler";
 
 export {
   createFileStructure,
@@ -20,4 +21,5 @@ export {
   getLanguageExtension,
   createFallbackNextJsProject,
   createNextJsProject,
+  handleCommandWithFirebase,
 };

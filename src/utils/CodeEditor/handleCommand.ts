@@ -1,8 +1,9 @@
-import { FileNode } from "@/types";
-import { Dispatch, SetStateAction } from "react";
+import type { FileNode } from "@/types";
+import type { Dispatch, SetStateAction } from "react";
 import createNextJsProject from "./createNextJsProject";
 import fetchNpmPackageInfo from "./fetchNPMPackInfo";
 import findPackageJson from "./findPackagJson";
+import type { FirebaseFileSystemService } from "@/services";
 
 type ItemType = "file" | "folder";
 
@@ -18,9 +19,14 @@ const handleCommand = async (
   setIsLoading: Dispatch<SetStateAction<boolean>>,
   fileSystem: FileNode[],
   setFileSystem: Dispatch<SetStateAction<FileNode[]>>,
-  createNewItem: (parentId: string, type: ItemType, name: string) => void,
+  createNewItem: (
+    parentId: string,
+    type: ItemType,
+    name: string
+  ) => Promise<void>, // Updated to Promise<void>
   setCurrentDirectory: (value: SetStateAction<string>) => void,
-  currentDirectory: string
+  currentDirectory: string,
+  firebaseService: FirebaseFileSystemService
 ) => {
   setIsLoading(true);
   terminal.write("\r\n");
@@ -82,14 +88,24 @@ const handleCommand = async (
       case "npx":
         if (args[1] === "create-next-app") {
           const projectName = args[2] || "my-next-app";
-          await createNextJsProject(projectName, terminal, setFileSystem);
+          await createNextJsProject(
+            projectName,
+            terminal,
+            createNewItem,
+            firebaseService
+          );
         } else if (args[1] === "create-react-app") {
           const projectName = args[2] || "my-react-app";
           terminal.writeln(`🚀 Creating a new React app in ./${projectName}`);
           terminal.writeln(
             "📦 This would create a React app (Next.js template used for demo)"
           );
-          await createNextJsProject(projectName, terminal, setFileSystem);
+          await createNextJsProject(
+            projectName,
+            terminal,
+            createNewItem,
+            firebaseService
+          );
         } else {
           terminal.writeln(
             `\x1b[31m✗\x1b[0m npx: command '${args[1]}' not found`
@@ -115,8 +131,9 @@ const handleCommand = async (
               terminal.writeln(
                 `\x1b[32m✓\x1b[0m Successfully installed ${packageName}@${packageInfo.version}`
               );
-              updatePackageJson(
-                setFileSystem,
+              await updatePackageJsonFirebase(
+                firebaseService,
+                fileSystem,
                 packageName,
                 packageInfo.version
               );
@@ -166,66 +183,59 @@ const handleCommand = async (
               terminal.writeln("🔧 Building fresh packages...");
               await new Promise((resolve) => setTimeout(resolve, 1500));
 
-              // Create node_modules and package-lock.json
+              // Create node_modules and package-lock.json using Firebase
               const projectNode = fileSystem.find((node) =>
                 node.children?.some((child) => child.name === "package.json")
               );
               if (projectNode) {
-                setFileSystem((prev) => {
-                  return prev.map((node) => {
-                    if (node.id === projectNode.id) {
-                      const hasNodeModules = node.children?.some(
-                        (child) => child.name === "node_modules"
-                      );
-                      const hasPackageLock = node.children?.some(
-                        (child) => child.name === "package-lock.json"
-                      );
+                const hasNodeModules = projectNode.children?.some(
+                  (child) => child.name === "node_modules"
+                );
+                const hasPackageLock = projectNode.children?.some(
+                  (child) => child.name === "package-lock.json"
+                );
 
-                      const newChildren = [...(node.children || [])];
-
-                      if (!hasNodeModules) {
-                        newChildren.push({
-                          id: `${Date.now()}-node-modules`,
-                          name: "node_modules",
-                          type: "folder",
-                          parentId: node.id,
-                          children: [],
-                          isOpen: false,
-                        });
-                      }
-                      if (!hasPackageLock) {
-                        newChildren.push({
-                          id: `${Date.now()}-package-lock`,
-                          name: "package-lock.json",
-                          type: "file",
-                          parentId: node.id,
-                          content: JSON.stringify(
-                            {
-                              name: packageJson.name || "project",
-                              version: packageJson.version || "1.0.0",
-                              lockfileVersion: 3,
-                              requires: true,
-                              packages: {
-                                "": {
-                                  name: packageJson.name || "project",
-                                  version: packageJson.version || "1.0.0",
-                                  dependencies: packageJson.dependencies || {},
-                                  devDependencies:
-                                    packageJson.devDependencies || {},
-                                },
-                              },
-                            },
-                            null,
-                            2
-                          ),
-                        });
-                      }
-
-                      return { ...node, children: newChildren };
+                if (!hasNodeModules) {
+                  await createNewItem(projectNode.id, "folder", "node_modules");
+                }
+                if (!hasPackageLock) {
+                  const packageLockContent = JSON.stringify(
+                    {
+                      name: packageJson.name || "project",
+                      version: packageJson.version || "1.0.0",
+                      lockfileVersion: 3,
+                      requires: true,
+                      packages: {
+                        "": {
+                          name: packageJson.name || "project",
+                          version: packageJson.version || "1.0.0",
+                          dependencies: packageJson.dependencies || {},
+                          devDependencies: packageJson.devDependencies || {},
+                        },
+                      },
+                    },
+                    null,
+                    2
+                  );
+                  await createNewItem(
+                    projectNode.id,
+                    "file",
+                    "package-lock.json"
+                  );
+                  // Update the content after creation
+                  setTimeout(async () => {
+                    const lockFile = fileSystem.find(
+                      (node) =>
+                        node.name === "package-lock.json" &&
+                        node.parentId === projectNode.id
+                    );
+                    if (lockFile) {
+                      await firebaseService.updateItem(lockFile.id, {
+                        content: packageLockContent,
+                      });
                     }
-                    return node;
-                  });
-                });
+                  }, 100);
+                }
               }
 
               terminal.writeln("");
@@ -262,16 +272,17 @@ const handleCommand = async (
             null,
             2
           );
-          createNewItem("root", "file", "package.json");
-          setTimeout(() => {
-            setFileSystem((prev) => {
-              return prev.map((node) => {
-                if (node.name === "package.json" && node.type === "file") {
-                  return { ...node, content: packageJsonContent };
-                }
-                return node;
+          await createNewItem("root", "file", "package.json");
+          // Update content after creation
+          setTimeout(async () => {
+            const packageJsonFile = fileSystem.find(
+              (node) => node.name === "package.json" && node.parentId === "root"
+            );
+            if (packageJsonFile) {
+              await firebaseService.updateItem(packageJsonFile.id, {
+                content: packageJsonContent,
               });
-            });
+            }
           }, 100);
           terminal.writeln("\x1b[32m✓\x1b[0m Created package.json");
         } else if (args[1] === "run" && args[2]) {
@@ -362,7 +373,7 @@ const handleCommand = async (
       case "touch":
         if (args[1]) {
           const fileName = args[1];
-          createNewItem("root", "file", fileName);
+          await createNewItem("root", "file", fileName);
           terminal.writeln(`\x1b[32m✓\x1b[0m Created file '${fileName}'`);
         } else {
           terminal.writeln("Usage: touch <filename>");
@@ -372,7 +383,7 @@ const handleCommand = async (
       case "mkdir":
         if (args[1]) {
           const dirName = args[1];
-          createNewItem("root", "folder", dirName);
+          await createNewItem("root", "folder", dirName);
           terminal.writeln(`\x1b[32m✓\x1b[0m Created directory '${dirName}'`);
         } else {
           terminal.writeln("Usage: mkdir <dirname>");
@@ -401,9 +412,10 @@ const handleCommand = async (
       case "clear":
       case "cls":
         terminal.clear();
-        terminal.writeln("🚀 \x1b[1;35mAdvanced Web Terminal\x1b[0m");
+        terminal.writeln("🚀 \x1b[1;35mCodeSync Collaborative Terminal\x1b[0m");
         terminal.writeln("💡 Type 'help' for available commands");
         terminal.writeln("🌐 Fetches real data from the internet");
+        terminal.writeln("🔥 Real-time collaboration enabled");
         break;
 
       case "node":
@@ -457,34 +469,28 @@ const handleCommand = async (
   terminal.write("\r\n\x1b[1;36m$\x1b[0m ");
 };
 
-// Helper function to update package.json after installing a package
-function updatePackageJson(
-  setFileSystem: Dispatch<SetStateAction<FileNode[]>>,
+// Helper function to update package.json after installing a package using Firebase
+async function updatePackageJsonFirebase(
+  firebaseService: FirebaseFileSystemService,
+  fileSystem: FileNode[],
   packageName: string,
   version: string
 ) {
-  setFileSystem((prev) => {
-    const newFileSystem = [...prev];
-    const packageJsonIndex = newFileSystem.findIndex(
-      (node) => node.name === "package.json"
-    );
-    if (packageJsonIndex !== -1) {
-      try {
-        const packageJson = JSON.parse(
-          newFileSystem[packageJsonIndex].content || "{}"
-        );
-        packageJson.dependencies = packageJson.dependencies || {};
-        packageJson.dependencies[packageName] = `^${version}`;
-        newFileSystem[packageJsonIndex] = {
-          ...newFileSystem[packageJsonIndex],
-          content: JSON.stringify(packageJson, null, 2),
-        };
-      } catch (e) {
-        console.error("Failed to update package.json:", e);
-      }
+  const packageJsonNode = fileSystem.find(
+    (node) => node.name === "package.json"
+  );
+  if (packageJsonNode) {
+    try {
+      const packageJson = JSON.parse(packageJsonNode.content || "{}");
+      packageJson.dependencies = packageJson.dependencies || {};
+      packageJson.dependencies[packageName] = `^${version}`;
+      await firebaseService.updateItem(packageJsonNode.id, {
+        content: JSON.stringify(packageJson, null, 2),
+      });
+    } catch (e) {
+      console.error("Failed to update package.json:", e);
     }
-    return newFileSystem;
-  });
+  }
 }
 
 export default handleCommand;

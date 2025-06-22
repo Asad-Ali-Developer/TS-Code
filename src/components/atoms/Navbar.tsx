@@ -1,23 +1,45 @@
 "use client";
-
-import { useAuth } from "@/providers";
-import { Code, GitBranch, Menu, Save, Settings, Share2 } from "lucide-react";
-import { useRouter } from "next/router";
+import { useAuth, useJoinedRoomId } from "@/providers";
+import { Code, GitBranch, Menu, Save, Share2, UserPlus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CreateRoomButton from "./CreateRoomButton";
 import JoinRoomModal from "./JoinRoomModal";
 import JoinedRoomMembersModal from "./JoinedRoomMembersModal";
+import { CodeService } from "@/services";
 
 const Navbar = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [roomId, setRoomId] = useState("");
 
   const router = useRouter();
   const { userDetails } = useAuth();
+  const { newJoinedRoomId, roomDetails } = useJoinedRoomId();
+  const codeService = new CodeService();
+
   const isLoggedIn = !!userDetails?.uid;
+  const ownerOfRoom = roomDetails?.ownerId === userDetails?.uid;
+
+  const handleLeaveRoom = async () => {
+    if (!userDetails?.uid || !newJoinedRoomId) return;
+    try {
+      await codeService.removeUserFromRoom(newJoinedRoomId, userDetails.uid);
+      localStorage.removeItem("newJoinedRoomId");
+    } catch (error) {
+      console.error("Failed to leave room:", error);
+    }
+  };
+
+  const handleDeleteRoomIfOwner = async () => {
+    if (!userDetails?.uid || !newJoinedRoomId) return;
+    try {
+      await codeService.deleteRoomIfOwner(newJoinedRoomId, userDetails.uid);
+      localStorage.removeItem("newJoinedRoomId");
+    } catch (error) {
+      console.error("Failed to delete room:", error);
+    }
+  };
 
   return (
     <header className="flex h-20 items-center justify-between bg-transparent px-4 md:px-8 lg:px-28">
@@ -47,81 +69,46 @@ const Navbar = () => {
       {/* Desktop Right Side */}
       {isLoggedIn ? (
         <div className="hidden md:flex items-center gap-2">
-          {/* Branch Button */}
-          <div className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-zinc-300 hover:bg-emerald-800/60 hover:text-zinc-100">
-            <GitBranch className="h-4 w-4" />
-            <span>main</span>
-          </div>
-
-          {/* Save Button */}
-          <button className="p-1 text-zinc-300 hover:text-zinc-100 focus:outline-none">
-            <Save className="h-5 w-5" />
-          </button>
-
-          {/* Dropdown Menu */}
-          <div className="relative">
+          {!newJoinedRoomId && <CreateRoomButton />}
+          {!newJoinedRoomId && (
             <button
               type="button"
-              onClick={() => setDropdownOpen((prev) => !prev)}
-              className="p-1 text-zinc-400 hover:text-zinc-100 focus:outline-none"
-              aria-label="Settings"
+              className="relative overflow-hidden rounded-full bg-gradient-to-r from-emerald-700 to-teal-500 py-1.5 px-5 font-medium text-white shadow-lg transition-all duration-300 hover:shadow-emerald-500/25"
+              onClick={() => setShowJoinModal(true)}
             >
-              <Settings className="h-5 w-5" />
+              Join Room
             </button>
-            {dropdownOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-zinc-900 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="py-1">
-                  <button
-                    type="button"
-                    onClick={() => setDropdownOpen(false)}
-                    className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                  >
-                    Editor Settings
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDropdownOpen(false)}
-                    className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                  >
-                    User Preferences
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDropdownOpen(false)}
-                    className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                  >
-                    Keyboard Shortcuts
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <CreateRoomButton />
-
-          {/* Share Button */}
-          <button className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 focus:outline-none">
-            <Share2 className="h-4 w-4" />
-            <span>Share</span>
-          </button>
-
-          {/* Join Room Button */}
-          <button
-            className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 focus:outline-none"
-            onClick={() => setShowJoinModal(true)}
-          >
-            Join Room
-          </button>
-
-          {/* See Joined Members Button */}
-          <button
-            className="flex items-center gap-1.5 rounded-md bg-purple-600 px-3 py-1.5 text-sm text-white hover:bg-purple-700 focus:outline-none"
-            onClick={() => setShowMembersModal(true)}
-            disabled={!roomId}
-            title={!roomId ? "Join a room first" : ""}
-          >
-            See Joined Members
-          </button>
+          )}
+          {newJoinedRoomId && (
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded-md bg-purple-600 px-3 py-1.5 text-sm text-white hover:bg-purple-700 focus:outline-none"
+              onClick={() => setShowMembersModal(true)}
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>See Members</span>
+            </button>
+          )}
+          {newJoinedRoomId && (
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 focus:outline-none"
+              onClick={handleLeaveRoom}
+            >
+              <X className="h-4 w-4" />
+              <span>Leave Room</span>
+            </button>
+          )}
+          {newJoinedRoomId && ownerOfRoom && (
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded-md bg-rose-600 px-3 py-1.5 text-sm text-white hover:bg-rose-700 focus:outline-none"
+              onClick={handleDeleteRoomIfOwner}
+            >
+              <X className="h-4 w-4" />
+              <span>Delete Room</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex items-center gap-2">
@@ -176,62 +163,48 @@ const Navbar = () => {
             <div className="flex flex-col gap-2">
               {isLoggedIn ? (
                 <>
-                  {/* Branch Button */}
-                  <div className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-zinc-300 hover:bg-emerald-800/60 hover:text-zinc-100">
-                    <GitBranch className="h-4 w-4" />
-                    <span>main</span>
-                  </div>
-                  {/* Save Button */}
-                  <button className="flex items-center gap-2 p-1 text-zinc-300 hover:text-zinc-100 focus:outline-none">
-                    <Save className="h-5 w-5" />
-                    <span>Save</span>
-                  </button>
-                  {/* Settings Dropdown (as list) */}
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-zinc-500 px-2">Settings</span>
-                    <button
-                      type="button"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                    >
-                      Editor Settings
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                    >
-                      User Preferences
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                    >
-                      Keyboard Shortcuts
-                    </button>
-                  </div>
-                  {/* Share Button */}
-                  <button className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 focus:outline-none mt-2">
-                    <Share2 className="h-4 w-4" />
-                    <span>Share</span>
-                  </button>
                   {/* Join Room Button */}
-                  <button
-                    className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 focus:outline-none"
-                    onClick={() => setShowJoinModal(true)}
-                  >
-                    Join Room
-                  </button>
+                  {!newJoinedRoomId && (
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 focus:outline-none"
+                      onClick={() => setShowJoinModal(true)}
+                    >
+                      Join Room
+                    </button>
+                  )}
                   {/* See Joined Members Button */}
-                  <button
-                    className="flex items-center gap-1.5 rounded-md bg-purple-600 px-3 py-1.5 text-sm text-white hover:bg-purple-700 focus:outline-none"
-                    onClick={() => setShowMembersModal(true)}
-                    disabled={!roomId}
-                    title={!roomId ? "Join a room first" : ""}
-                  >
-                    See Joined Members
-                  </button>
+                  {newJoinedRoomId && (
+                    <button
+                      className="flex items-center gap-1.5 rounded-md bg-purple-600 px-3 py-1.5 text-sm text-white hover:bg-purple-700 focus:outline-none"
+                      onClick={() => setShowMembersModal(true)}
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      <span>See Members</span>
+                    </button>
+                  )}
+                  {/* Leave Room Button */}
+                  {newJoinedRoomId && (
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 focus:outline-none"
+                      onClick={handleLeaveRoom}
+                    >
+                      <X className="h-4 w-4" />
+                      <span>Leave Room</span>
+                    </button>
+                  )}
+                  {/* Delete Room Button */}
+                  {newJoinedRoomId && ownerOfRoom && (
+                    <button
+                      type="button"
+                      className="flex items-center gap-1.5 rounded-md bg-rose-600 px-3 py-1.5 text-sm text-white hover:bg-rose-700 focus:outline-none"
+                      onClick={handleDeleteRoomIfOwner}
+                    >
+                      <X className="h-4 w-4" />
+                      <span>Delete Room</span>
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
@@ -262,17 +235,11 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* Join Room Modal */}
-      {showJoinModal && (
-        <JoinRoomModal
-          setShowJoinModal={setShowJoinModal}
-          setRoomId={setRoomId}
-        />
-      )}
-
-      {/* Joined Members Modal */}
-      {showMembersModal && (
+      {/* Modals */}
+      {showJoinModal && <JoinRoomModal setShowJoinModal={setShowJoinModal} />}
+      {showMembersModal && newJoinedRoomId && (
         <JoinedRoomMembersModal
+          key={newJoinedRoomId}
           showMembersModal={showMembersModal}
           setShowMembersModal={setShowMembersModal}
         />
