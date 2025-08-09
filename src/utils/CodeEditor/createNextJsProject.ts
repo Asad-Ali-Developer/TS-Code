@@ -1,9 +1,6 @@
-import fetchGitHubRepo from "./fetchGithubRepo"
-// import generatePackageJson from "./generatePackageJson"
-// import generateReadme from "./generateReadme"
-import createFallbackNextJsProject from "./createFallbackNextJsProject"
 import type { Terminal as XTermTerminal } from "xterm"
-import type { FirebaseFileSystemService } from "@/services"
+import createFallbackNextJsProject from "./createFallbackNextJsProject"
+import fetchGitHubRepo from "./fetchGithubRepo"
 
 type ItemType = "file" | "folder"
 
@@ -11,7 +8,6 @@ const createNextJsProject = async (
   projectName: string,
   terminal: XTermTerminal,
   createNewItem: (parentId: string, type: ItemType, name: string) => Promise<void>,
-  firebaseService: FirebaseFileSystemService,
 ) => {
   try {
     terminal.writeln(`🚀 Creating a new Next.js app in ./${projectName}`)
@@ -25,7 +21,7 @@ const createNextJsProject = async (
     if (files.length === 0) {
       // Fallback to a simpler template
       terminal.writeln("⚠️  Using fallback template...")
-      await createFallbackNextJsProject(projectName, terminal, createNewItem, firebaseService)
+      await createFallbackNextJsProject(projectName, terminal, createNewItem)
       return
     }
 
@@ -168,7 +164,7 @@ const createNextJsProject = async (
   } catch (error) {
     terminal.writeln(`\x1b[31m✗\x1b[0m Error creating project: ${error}`)
     terminal.writeln("⚠️  Creating fallback template...")
-    await createFallbackNextJsProject(projectName, terminal, createNewItem, firebaseService)
+    await createFallbackNextJsProject(projectName, terminal, createNewItem)
   }
 }
 

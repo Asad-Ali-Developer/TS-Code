@@ -12,7 +12,9 @@ import {
 export interface JoinedRoomContextType {
   newJoinedRoomId: string | null;
   setNewJoinedRoomId: (roomId: string | null) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   roomDetails: any | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setRoomDetails: (details: any | null) => void;
   roomMembers: string[];
   setRoomMembers: (members: string[]) => void;
@@ -32,6 +34,7 @@ export const JoinedRoomProvider: FC<JoinedRoomProviderProps> = ({
   const [newJoinedRoomId, setNewJoinedRoomIdState] = useState<string | null>(
     null
   );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [roomDetails, setRoomDetails] = useState<any | null>(null);
   const [roomMembers, setRoomMembers] = useState<string[]>([]);
 

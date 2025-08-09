@@ -1,4 +1,4 @@
-import RoomsList from "./RoomsList";
+// import RoomsList from "./RoomsList";
 import UsersList from "./UserList";
 import { SidebarForEditor } from "./CodeEditor/SidebarForEditor";
 import TabsForEditor from "./CodeEditor/TabsForEditor";
@@ -8,7 +8,7 @@ import OpenTerminalButtonForEditor from "./CodeEditor/OpenTerminalButtonForEdito
 import ContextMenuForEditor from "./CodeEditor/ContextMenuForEditor";
 
 export {
-  RoomsList,
+  // RoomsList,
   UsersList,
   SidebarForEditor,
   TabsForEditor,

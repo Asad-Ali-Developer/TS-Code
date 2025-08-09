@@ -2,15 +2,14 @@
 
 import { useAuth, useJoinedRoomId } from "@/providers";
 import { CodeService } from "@/services";
+import { X } from "lucide-react";
 import {
-  type Dispatch,
   type FC,
   type FormEvent,
   type SetStateAction,
-  useState,
+  useState
 } from "react";
 import { toast } from "react-toastify";
-import { X } from "lucide-react";
 
 interface JoinRoomModalProps {
   setShowJoinModal: (value: SetStateAction<boolean>) => void;
@@ -24,7 +23,7 @@ const JoinRoomModal: FC<JoinRoomModalProps> = ({ setShowJoinModal }) => {
 
   const codeService = new CodeService();
   const { userDetails } = useAuth();
-  const { setNewJoinedRoomId, setRoomDetails } = useJoinedRoomId();
+  const { setNewJoinedRoomId } = useJoinedRoomId();
 
   // Handler for joining a room
   const handleJoinRoom = async (e?: FormEvent) => {
@@ -57,23 +56,6 @@ const JoinRoomModal: FC<JoinRoomModalProps> = ({ setShowJoinModal }) => {
       }
 
       console.log(`✅ Room verified, joining room: ${roomIdInput}`);
-
-      const unsubscribe = await codeService.joinRoomRealtime(
-        roomIdInput,
-        userDetails.uid,
-        roomPasswordInput,
-        (roomData) => {
-          if (roomData) {
-            console.log(`📡 Room data received:`, roomData);
-            setRoomDetails(roomData);
-          } else {
-            console.error("❌ Failed to get room data or invalid credentials");
-            setJoinError("Failed to join room or invalid credentials");
-            toast.error("Failed to join room");
-          }
-        }
-      );
-
       setNewJoinedRoomId(roomIdInput);
 
       console.log(`🎉 Successfully joined room: ${roomIdInput}`);
@@ -81,6 +63,7 @@ const JoinRoomModal: FC<JoinRoomModalProps> = ({ setShowJoinModal }) => {
 
       setShowJoinModal(false);
       setJoinError(null);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("❌ Error joining room:", err);
       const errorMessage = err.message || "Failed to join room";

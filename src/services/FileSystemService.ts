@@ -180,7 +180,9 @@ export class FirebaseFileSystemService {
   }
 
   // Create a new file or folder in the current room
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async createItem(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     item: Omit<FileNode, "id"> & { createdAt?: any }
   ): Promise<string> {
     try {
@@ -193,6 +195,7 @@ export class FirebaseFileSystemService {
 
       // Filter out undefined values as Firebase doesn't support them
       const cleanedData = Object.fromEntries(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         Object.entries(itemData).filter(([_, value]) => value !== undefined)
       );
 
@@ -224,6 +227,7 @@ export class FirebaseFileSystemService {
           ...updates,
           updatedAt: new Date(),
           lastUpdatedBy: userId,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         }).filter(([_, value]) => value !== undefined)
       );
 
@@ -403,6 +407,7 @@ export class FirebaseFileSystemService {
     item: FileNode,
     parentId: string
   ): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const itemData: any = {
       name: item.name,
       type: item.type,

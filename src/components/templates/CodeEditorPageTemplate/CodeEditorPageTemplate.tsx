@@ -315,6 +315,7 @@ const CodeEditorPage = () => {
         type: "file" | "folder";
         parentId: string;
         content?: string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         children?: any[];
       }>
     ) => {
@@ -332,6 +333,7 @@ const CodeEditorPage = () => {
 
           // If it has children (for folders), create them recursively
           if (item.children && item.children.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const childItems = item.children.map((child: any) => ({
               ...child,
               parentId: newId,

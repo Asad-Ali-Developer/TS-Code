@@ -1,5 +1,4 @@
 import type { Terminal as XTermTerminal } from "xterm"
-import type { FirebaseFileSystemService } from "@/services"
 
 type ItemType = "file" | "folder"
 
@@ -7,12 +6,9 @@ const createFallbackNextJsProject = async (
   projectName: string,
   terminal: XTermTerminal,
   createNewItem: (parentId: string, type: ItemType, name: string) => Promise<void>,
-  firebaseService: FirebaseFileSystemService,
 ) => {
   try {
     terminal.writeln(`📦 Creating fallback Next.js project: ${projectName}`)
-
-    firebaseService
 
     // Create project folder
     await createNewItem("root", "folder", projectName)

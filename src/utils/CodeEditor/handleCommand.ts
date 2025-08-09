@@ -92,7 +92,6 @@ const handleCommand = async (
             projectName,
             terminal,
             createNewItem,
-            firebaseService
           );
         } else if (args[1] === "create-react-app") {
           const projectName = args[2] || "my-react-app";
@@ -104,7 +103,6 @@ const handleCommand = async (
             projectName,
             terminal,
             createNewItem,
-            firebaseService
           );
         } else {
           terminal.writeln(

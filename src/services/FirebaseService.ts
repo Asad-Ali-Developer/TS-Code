@@ -6,9 +6,19 @@ import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
+interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  measurementId: string;
+}
+
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+const firebaseConfig: FirebaseConfig = {
   apiKey: "AIzaSyDQscStnnxjZNCvMft_dVwbPXV4WZhK15k",
   authDomain: "ts-code-68f33.firebaseapp.com",
   projectId: "ts-code-68f33",

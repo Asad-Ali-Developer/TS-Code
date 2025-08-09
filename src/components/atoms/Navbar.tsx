@@ -1,6 +1,6 @@
 "use client";
 import { useAuth, useJoinedRoomId } from "@/providers";
-import { CodeService } from "@/services";
+import { AuthService, CodeService } from "@/services";
 import { Code, Menu, UserPlus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,6 +8,8 @@ import CreateRoomButton from "./CreateRoomButton";
 import JoinRoomModal from "./JoinRoomModal";
 import JoinedRoomMembersModal from "./JoinedRoomMembersModal";
 import { MdDeleteOutline } from "react-icons/md";
+import { TbLogout2 } from "react-icons/tb";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -16,8 +18,10 @@ const Navbar = () => {
   const [deleteRoomLoading, setDeleteRoomLoading] = useState<boolean>(false);
   const [leaveRoomLoading, setLeaveRoomLoading] = useState<boolean>(false);
 
+  const authService = new AuthService();
+
   const router = useRouter();
-  const { userDetails } = useAuth();
+  const { userDetails, setUserDetails } = useAuth();
   const { newJoinedRoomId, roomDetails, setRoomDetails, setNewJoinedRoomId } =
     useJoinedRoomId();
   const codeService = new CodeService();
@@ -54,6 +58,17 @@ const Navbar = () => {
       console.error("Failed to delete room:", error);
     } finally {
       setDeleteRoomLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      setUserDetails(null);
+      toast.success("Logged out successfully!");
+      router.push("/");
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -112,7 +127,7 @@ const Navbar = () => {
               onClick={handleLeaveRoom}
             >
               <MdDeleteOutline className="h-4 w-4" />
-              <span>Leave Room</span>
+              <span>{leaveRoomLoading ? 'Leaving...' : 'Leave Room'}</span>
             </button>
           )}
 
@@ -123,9 +138,18 @@ const Navbar = () => {
               onClick={handleDeleteRoomIfOwner}
             >
               <MdDeleteOutline className="h-4 w-4" />
-              <span>Delete Room</span>
+              <span>{deleteRoomLoading ? 'deleting room...' : 'Delete Room'}</span>
             </button>
           )}
+
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 focus:outline-none"
+            onClick={handleLogout}
+          >
+            <TbLogout2 className="h-4 w-4" />
+            <span>Logout</span>
+          </button>
         </div>
       ) : (
         <div className="flex items-center gap-2">
