@@ -1,4 +1,5 @@
 import { Github, Twitter, Linkedin } from "lucide-react";
+import Link from "next/link";
 
 const Footer = () => {
   return (
@@ -27,30 +28,22 @@ const Footer = () => {
         </div>
         {/* Right: Socials */}
         <div className="flex gap-3">
-          <a
-            href="https://github.com/"
+          <Link
+            href="https://github.com/Asad-Ali-Developer"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
           >
             <Github className="h-5 w-5 hover:text-emerald-400 transition" />
-          </a>
-          <a
-            href="https://twitter.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Twitter"
-          >
-            <Twitter className="h-5 w-5 hover:text-emerald-400 transition" />
-          </a>
-          <a
-            href="https://linkedin.com/"
+          </Link>
+          <Link
+            href="https://www.linkedin.com/in/asad-ali-najaf-35102720b"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="LinkedIn"
           >
             <Linkedin className="h-5 w-5 hover:text-emerald-400 transition" />
-          </a>
+          </Link>
         </div>
       </div>
       <div className="mt-4 text-xs text-center text-zinc-500">
