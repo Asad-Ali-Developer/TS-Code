@@ -3,16 +3,14 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { useRouter } from "next/router";
-import { type SigninFormInputsTypes, SigninSchema, UserDetails } from "@/types";
-import { Google_Logo } from "@/assets";
+import { type SigninFormInputsTypes, SigninSchema } from "@/types";
 import { useAuth } from "@/providers";
 import { AuthService } from "@/services";
 
 const SignInPageTemplate = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
+  // const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const { setUserDetails } = useAuth();
@@ -48,27 +46,27 @@ const SignInPageTemplate = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    const authService = new AuthService();
+  // const handleGoogleLogin = async () => {
+  //   const authService = new AuthService();
 
-    try {
-      setIsGoogleLoading(true);
-      const response = await authService.loginByGoogle();
+  //   try {
+  //     setIsGoogleLoading(true);
+  //     const response = await authService.loginByGoogle();
 
-      // 🔒 If register failed (e.g., user exists), stop
-      if (!response?.uid) {
-        return;
-      }
+  //     // 🔒 If register failed (e.g., user exists), stop
+  //     if (!response?.uid) {
+  //       return;
+  //     }
 
-      setUserDetails(response as UserDetails);
+  //     setUserDetails(response as UserDetails);
 
-      router.push("/code");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
+  //     router.push("/code");
+  //   } catch (error) {
+  //     console.log(error);
+  //   } finally {
+  //     setIsGoogleLoading(false);
+  //   }
+  // };
 
   const handleSignUp = () => {
     router.push("/signup");
@@ -158,17 +156,17 @@ const SignInPageTemplate = () => {
             </div>
 
             {/* Divider */}
-            <div className="relative my-2">
+            {/* <div className="relative my-2">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-xs">
                 <span className="px-2 bg-gray-900 text-gray-400">or</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Google Login Button */}
-            <button
+            {/* <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
@@ -186,7 +184,7 @@ const SignInPageTemplate = () => {
                   <span>Continue with Google</span>
                 </>
               )}
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

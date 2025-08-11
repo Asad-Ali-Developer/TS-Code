@@ -1,10 +1,8 @@
 "use client";
 
-import { Google_Logo } from "@/assets";
 import { AuthService } from "@/services";
 import { SignUpFormInputs, SignUpSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,7 +10,7 @@ import { toast } from "react-toastify";
 
 const SignUpPageTemplate = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
+  // const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
 
   const router = useRouter();
 
@@ -52,20 +50,20 @@ const SignUpPageTemplate = () => {
     }
   };
 
-  const handleGoogleRegister = async () => {
-    try {
-      setIsGoogleLoading(true);
+  // const handleGoogleRegister = async () => {
+  //   try {
+  //     setIsGoogleLoading(true);
 
-      await authService.registerByGoogle();
+  //     await authService.registerByGoogle();
 
-      router.push("/signin");
-      toast.success("Registration successful!");
-    } catch (error) {
-      console.log("Google registration error:", error);
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
+  //     router.push("/signin");
+  //     toast.success("Registration successful!");
+  //   } catch (error) {
+  //     console.log("Google registration error:", error);
+  //   } finally {
+  //     setIsGoogleLoading(false);
+  //   }
+  // };
 
   const handleSignIn = () => {
     router.push("/signin");
@@ -179,17 +177,17 @@ const SignUpPageTemplate = () => {
             </div>
 
             {/* Divider */}
-            <div className="relative my-2">
+            {/* <div className="relative my-2">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-xs">
                 <span className="px-2 bg-gray-900 text-gray-400">or</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Google Login Button */}
-            <button
+            {/* <button
               type="button"
               onClick={handleGoogleRegister}
               className="w-full flex items-center justify-center gap-3 bg-teal-700 border border-teal-700 rounded-lg py-3.5 px-4 text-white hover:bg-teal-800 hover:border-teal-800 transition-all duration-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-700"
@@ -206,7 +204,7 @@ const SignUpPageTemplate = () => {
                   <span>Continue with Google</span>
                 </div>
               )}
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

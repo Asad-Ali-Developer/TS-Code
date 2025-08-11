@@ -47,7 +47,7 @@ class AuthService {
       // Store user details in localStorage
       localStorage.setItem("userDetails", JSON.stringify(userData));
 
-      toast.success("Login successful!");
+      // toast.success("Login successful!");
       return userData;
     } catch (error) {
       console.error("Login error:", error);
@@ -96,7 +96,7 @@ class AuthService {
 
       await setDoc(doc(firebaseDB, "app_users", user.uid), userDoc);
 
-      toast.success("User registered and saved!");
+      // toast.success("User registered and saved!");
       return user;
     } catch (error: unknown) {
       const firebaseError = error as FirebaseError;
@@ -117,7 +117,7 @@ class AuthService {
 
       // Remove user details from localStorage
       localStorage.removeItem("userDetails");
-      toast.success("Logout successful!");
+      // toast.success("Logout successful!");
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Logout failed!");
@@ -155,7 +155,7 @@ class AuthService {
 
       await setDoc(userDocRef, userDoc);
 
-      toast.success("Google registration successful!");
+      // toast.success("Google registration successful!");
       return user;
     } catch (error) {
       console.log("Google registration error:", error);
@@ -184,7 +184,7 @@ class AuthService {
 
       const userData = querySnapshot.docs[0].data() as UserDetails;
 
-      toast.success("Login successful!");
+      // toast.success("Login successful!");
       return userData;
     } catch (error) {
       console.log("Google login error:", error);
